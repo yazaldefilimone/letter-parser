@@ -1,7 +1,7 @@
 {
   "name": "javascript-starter",
   "version": "1.0.0",
-  "type": "commonjs",
+  "type": "module",
   "description": "JavaScript starter with vitest, prettier, eslint. All the tools you need to build your project.",
   "main": "index.ts",
   "repository": "git@github.com:yazaldefilimonepinto/javascript-starter.git",
