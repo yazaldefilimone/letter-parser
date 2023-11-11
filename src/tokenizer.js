@@ -2,6 +2,21 @@ export const tokenTypes = {
   NUMBER: 'NUMBER',
   STRING: `STRING`,
 };
+
+const spec = [
+  // numbers
+  [/^\d+/, tokenTypes.NUMBER],
+  // strings ""
+  [/^"[^"]*"/, tokenTypes.STRING],
+  // strings ''
+  [/^'[^']*'/, tokenTypes.STRING],
+  // whitespace ___
+  [/^\s+/, null],
+  // skip single line comment
+  [/^\/\/.*/, null],
+  // skip multi-line comment
+  [/^\/\*[\s\S]*?\*\//, null],
+];
 export class Tokenizer {
   init(string) {
     this._string = string;
@@ -14,32 +29,22 @@ export class Tokenizer {
     }
 
     const current = this._string.slice(this._cursor);
-
-    if (!Number.isNaN(Number(current.at(0)))) {
-      let numbers = current.at(0);
-      this._cursor++;
-      while (!Number.isNaN(Number(current.at(this._cursor)))) {
-        numbers += current.at(this._cursor++);
+    for (const [regex, type] of spec) {
+      const value = this._match(regex, current);
+      // can't match this rule.... continue
+      if (value === null) {
+        continue;
+      }
+      // should skip token... e.g. whitespace
+      if (type === null) {
+        return this.getNextToken();
       }
       return {
-        type: tokenTypes.NUMBER,
-        value: numbers,
+        type,
+        value,
       };
     }
-
-    if (current.at(0) === '"') {
-      let str = '';
-      do {
-        str += current.at(this._cursor++);
-      } while (current.at(this._cursor) !== '"' && !this._isEOF());
-      str += this._cursor++; // skip "
-      return {
-        type: tokenTypes.STRING,
-        value: str,
-      };
-    }
-
-    return null;
+    throw SyntaxError(`unexpected token type  "${current[0]}"`);
   }
 
   _isHasTokens() {
@@ -47,5 +52,13 @@ export class Tokenizer {
   }
   _isEOF() {
     return this._cursor === this._string.length;
+  }
+  _match(regex, value) {
+    const matched = regex.exec(value);
+    if (matched === null) {
+      return null;
+    }
+    this._cursor += matched[0].length;
+    return matched[0];
   }
 }
