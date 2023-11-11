@@ -4,7 +4,14 @@ import { Parser } from "../src/parser.js";
 const parser = new Parser();
 
 
-const program = `"hello"`;
+const program = `   
+/**
+ * 
+ * 
+ *  String
+ **/
+
+100`;
 
 
 
