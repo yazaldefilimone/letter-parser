@@ -81,7 +81,6 @@ export class Parser {
       throw SyntaxError(`Unexpected token ${token.type}, expected ${type}`);
     }
     //  advance to next token
-
     this._lookAhead = this._tokenizer.getNextToken();
     return token;
   }
