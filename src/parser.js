@@ -1,10 +1,12 @@
-import { Tokenizer, tokenTypes } from './tokenizer.js';
+import { Tokenizer, tokensEnum } from './tokenizer.js';
 
 export const ASTTypes = {
   Program: `Program`,
   NumericLiteral: `NumericLiteral`,
   StringLiteral: `StringLiteral`,
   ExpressionStatement: `ExpressionStatement`,
+  BlockStatement: `BlockStatement`,
+  EmptyStatement: `EmptyStatement`,
 };
 
 export class Parser {
@@ -39,26 +41,64 @@ export class Parser {
    * | StringLiteral
    * ;
    */
-  StatementList() {
+  StatementList(stopLookToken = null) {
     const nodes = [this.Statement()];
-    while (this._lookAhead !== null) {
+    while (this._lookAhead !== null && this._lookAhead.type !== stopLookToken) {
       nodes.push(this.Statement());
     }
     return nodes;
   }
+  /**
+   *
+   * Statement
+   * : ExpressionStatement
+   * | BlockStatement
+   * | EmptyStatement
+   * ;
+   */
   Statement() {
-    return this.ExpressionStatement();
+    switch (this._lookAhead.type) {
+      case tokensEnum.SEMICOLON:
+        return this.EmptyStatement();
+      case tokensEnum.LEFT_BRACE:
+        return this.BlockStatement();
+      default:
+        return this.ExpressionStatement();
+    }
   }
   ExpressionStatement() {
     const expression = this.Expression();
-    this._eat(';');
+    this._eat(tokensEnum.SEMICOLON);
     return {
       type: ASTTypes.ExpressionStatement,
       expression,
     };
   }
+
+  BlockStatement() {
+    this._eat(tokensEnum.LEFT_BRACE);
+
+    let body;
+    if (this._lookAhead.type !== tokensEnum.RIGHT_BRACE) {
+      body = this.StatementList(tokensEnum.RIGHT_BRACE);
+    } else {
+      body = [];
+    }
+
+    this._eat(tokensEnum.RIGHT_BRACE);
+    return {
+      type: ASTTypes.BlockStatement,
+      body,
+    };
+  }
   Expression() {
     return this.Literal();
+  }
+  EmptyStatement() {
+    this._eat(tokensEnum.SEMICOLON);
+    return {
+      type: ASTTypes.EmptyStatement,
+    };
   }
   /**
    *
@@ -70,12 +110,12 @@ export class Parser {
 
   Literal() {
     switch (this._lookAhead.type) {
-      case tokenTypes.NUMBER:
+      case tokensEnum.NUMBER:
         return this.NumericLiteral();
-      case tokenTypes.STRING:
+      case tokensEnum.STRING:
         return this.StringLiteral();
       default:
-        throw new SyntaxError('Literal: unexpected literal production');
+        throw new SyntaxError('Literal: unexpected literal production, receive ' + this._lookAhead.type);
     }
   }
 
@@ -85,7 +125,7 @@ export class Parser {
    *  ;
    */
   NumericLiteral() {
-    const token = this._eat(tokenTypes.NUMBER);
+    const token = this._eat(tokensEnum.NUMBER);
     return {
       type: ASTTypes.NumericLiteral,
       value: token.value,
@@ -93,7 +133,7 @@ export class Parser {
   }
 
   StringLiteral() {
-    const token = this._eat(tokenTypes.STRING);
+    const token = this._eat(tokensEnum.STRING);
     return {
       type: ASTTypes.StringLiteral,
       value: token.value.slice(1, -1),
