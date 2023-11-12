@@ -16,6 +16,8 @@ const spec = [
   [/^\/\/.*/, null],
   // skip multi-line comment
   [/^\/\*[\s\S]*?\*\//, null],
+  // skip multi-line comment
+  [/^;/, ';'],
 ];
 export class Tokenizer {
   init(string) {
