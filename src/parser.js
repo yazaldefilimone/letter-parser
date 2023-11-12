@@ -1,9 +1,10 @@
 import { Tokenizer, tokenTypes } from './tokenizer.js';
 
-export const astTypes = {
+export const ASTTypes = {
   Program: `Program`,
   NumericLiteral: `NumericLiteral`,
   StringLiteral: `StringLiteral`,
+  ExpressionStatement: `ExpressionStatement`,
 };
 
 export class Parser {
@@ -27,16 +28,43 @@ export class Parser {
    */
   Program() {
     return {
-      type: astTypes.Program,
-      body: this.Literal(),
+      type: ASTTypes.Program,
+      body: this.StatementList(),
     };
   }
-
+  /**
+   *
+   * StatementList
+   * : StatementList -> Statement StatementList
+   * | StringLiteral
+   * ;
+   */
+  StatementList() {
+    const nodes = [this.Statement()];
+    while (this._lookAhead !== null) {
+      nodes.push(this.Statement());
+    }
+    return nodes;
+  }
+  Statement() {
+    return this.ExpressionStatement();
+  }
+  ExpressionStatement() {
+    const expression = this.Expression();
+    this._eat(';');
+    return {
+      type: ASTTypes.ExpressionStatement,
+      expression,
+    };
+  }
+  Expression() {
+    return this.Literal();
+  }
   /**
    *
    * Literal
    * :NumericLiteral
-   * :StringLiteral
+   * |StringLiteral
    * ;
    */
 
@@ -59,7 +87,7 @@ export class Parser {
   NumericLiteral() {
     const token = this._eat(tokenTypes.NUMBER);
     return {
-      type: astTypes.NumericLiteral,
+      type: ASTTypes.NumericLiteral,
       value: token.value,
     };
   }
@@ -67,7 +95,7 @@ export class Parser {
   StringLiteral() {
     const token = this._eat(tokenTypes.STRING);
     return {
-      type: astTypes.StringLiteral,
+      type: ASTTypes.StringLiteral,
       value: token.value.slice(1, -1),
     };
   }
