@@ -1,23 +1,29 @@
-export const tokenTypes = {
+export const tokensEnum = {
   NUMBER: 'NUMBER',
   STRING: `STRING`,
+  SEMICOLON: `;`,
+  LEFT_BRACE: `{`,
+  RIGHT_BRACE: `}`,
 };
 
 const spec = [
   // numbers
-  [/^\d+/, tokenTypes.NUMBER],
+  [/^\d+/, tokensEnum.NUMBER],
   // strings ""
-  [/^"[^"]*"/, tokenTypes.STRING],
+  [/^"[^"]*"/, tokensEnum.STRING],
   // strings ''
-  [/^'[^']*'/, tokenTypes.STRING],
+  [/^'[^']*'/, tokensEnum.STRING],
   // whitespace ___
   [/^\s+/, null],
   // skip single line comment
   [/^\/\/.*/, null],
   // skip multi-line comment
   [/^\/\*[\s\S]*?\*\//, null],
-  // skip multi-line comment
-  [/^;/, ';'],
+  // end of statement
+  [/^;/, tokensEnum.SEMICOLON],
+  // block
+  [/^\{/, tokensEnum.LEFT_BRACE],
+  [/^\}/, tokensEnum.RIGHT_BRACE],
 ];
 export class Tokenizer {
   init(string) {
