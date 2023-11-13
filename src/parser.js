@@ -7,6 +7,7 @@ export const ASTTypes = {
   ExpressionStatement: `ExpressionStatement`,
   BlockStatement: `BlockStatement`,
   EmptyStatement: `EmptyStatement`,
+  BinaryExpression: `BinaryExpression`,
 };
 
 export class Parser {
@@ -92,13 +93,44 @@ export class Parser {
     };
   }
   Expression() {
-    return this.Literal();
+    return this.AdditiveExpression();
   }
   EmptyStatement() {
     this._eat(tokensEnum.SEMICOLON);
     return {
       type: ASTTypes.EmptyStatement,
     };
+  }
+  AdditiveExpression() {
+    let left = this.MultiplicativeExpression();
+    while (this._lookAhead.type === tokensEnum.ADDITIVE_OPERATOR) {
+      // + / -
+      const operator = this._eat(tokensEnum.ADDITIVE_OPERATOR).value;
+      const right = this.MultiplicativeExpression();
+      left = {
+        type: ASTTypes.BinaryExpression,
+        left,
+        operator,
+        right,
+      };
+    }
+    return left;
+  }
+
+  MultiplicativeExpression() {
+    let left = this.PrimaryExpression();
+    while (this._lookAhead.type === tokensEnum.MULTIPLICATIVE_OPERATOR) {
+      // + / -
+      const operator = this._eat(tokensEnum.MULTIPLICATIVE_OPERATOR).value;
+      const right = this.PrimaryExpression();
+      left = {
+        type: ASTTypes.BinaryExpression,
+        left,
+        operator,
+        right,
+      };
+    }
+    return left;
   }
   /**
    *
@@ -107,7 +139,18 @@ export class Parser {
    * |StringLiteral
    * ;
    */
-
+  PrimaryExpression() {
+    if (this._lookAhead.type === tokensEnum.LEFT_PARENT) {
+      return this.ParenthesizedExpression();
+    }
+    return this.Literal();
+  }
+  ParenthesizedExpression() {
+    this._eat(tokensEnum.LEFT_PARENT);
+    const expression = this.Expression();
+    this._eat(tokensEnum.RIGHT_PARENT);
+    return expression;
+  }
   Literal() {
     switch (this._lookAhead.type) {
       case tokensEnum.NUMBER:
