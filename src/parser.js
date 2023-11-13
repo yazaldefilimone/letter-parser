@@ -101,36 +101,13 @@ export class Parser {
       type: ASTTypes.EmptyStatement,
     };
   }
+
   AdditiveExpression() {
-    let left = this.MultiplicativeExpression();
-    while (this._lookAhead.type === tokensEnum.ADDITIVE_OPERATOR) {
-      // + / -
-      const operator = this._eat(tokensEnum.ADDITIVE_OPERATOR).value;
-      const right = this.MultiplicativeExpression();
-      left = {
-        type: ASTTypes.BinaryExpression,
-        left,
-        operator,
-        right,
-      };
-    }
-    return left;
+    return this._BinaryExpression('MultiplicativeExpression', tokensEnum.ADDITIVE_OPERATOR);
   }
 
   MultiplicativeExpression() {
-    let left = this.PrimaryExpression();
-    while (this._lookAhead.type === tokensEnum.MULTIPLICATIVE_OPERATOR) {
-      // + / -
-      const operator = this._eat(tokensEnum.MULTIPLICATIVE_OPERATOR).value;
-      const right = this.PrimaryExpression();
-      left = {
-        type: ASTTypes.BinaryExpression,
-        left,
-        operator,
-        right,
-      };
-    }
-    return left;
+    return this._BinaryExpression('PrimaryExpression', tokensEnum.MULTIPLICATIVE_OPERATOR);
   }
   /**
    *
@@ -194,5 +171,20 @@ export class Parser {
     //  advance to next token
     this._lookAhead = this._tokenizer.getNextToken();
     return token;
+  }
+  _BinaryExpression(builder, tokenEnum) {
+    let left = this[builder]();
+    while (this._lookAhead.type === tokensEnum[tokenEnum]) {
+      // + / -
+      const operator = this._eat(tokensEnum[tokenEnum]).value;
+      const right = this[builder]();
+      left = {
+        type: ASTTypes.BinaryExpression,
+        left,
+        operator,
+        right,
+      };
+    }
+    return left;
   }
 }
