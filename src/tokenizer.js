@@ -1,11 +1,14 @@
 export const tokensEnum = {
   NUMBER: 'NUMBER',
   STRING: `STRING`,
+  ADDITIVE_OPERATOR: `ADDITIVE_OPERATOR`,
+  MULTIPLICATIVE_OPERATOR: `MULTIPLICATIVE_OPERATOR`,
   SEMICOLON: `;`,
   LEFT_BRACE: `{`,
   RIGHT_BRACE: `}`,
+  LEFT_PARENT: `(`,
+  RIGHT_PARENT: `)`,
 };
-
 const spec = [
   // numbers
   [/^\d+/, tokensEnum.NUMBER],
@@ -24,6 +27,12 @@ const spec = [
   // block
   [/^\{/, tokensEnum.LEFT_BRACE],
   [/^\}/, tokensEnum.RIGHT_BRACE],
+  //
+  [/^\(/, tokensEnum.LEFT_PARENT],
+  [/^\)/, tokensEnum.RIGHT_PARENT],
+  // math: -/+
+  [/^[+\-]/, tokensEnum.ADDITIVE_OPERATOR],
+  [/^[*\/]/, tokensEnum.MULTIPLICATIVE_OPERATOR],
 ];
 export class Tokenizer {
   init(string) {
