@@ -5,6 +5,7 @@ export const tokensEnum = {
   MULTIPLICATIVE_OPERATOR: `MULTIPLICATIVE_OPERATOR`,
   SEMICOLON: `;`,
   LEFT_BRACE: `{`,
+  IDENTIFIER: `IDENTIFIER`,
   RIGHT_BRACE: `}`,
   LEFT_PARENT: `(`,
   RIGHT_PARENT: `)`,
@@ -27,6 +28,9 @@ const spec = [
   // block
   [/^\{/, tokensEnum.LEFT_BRACE],
   [/^\}/, tokensEnum.RIGHT_BRACE],
+  // identifier
+  [/^\w+/, tokensEnum.IDENTIFIER],
+
   //
   [/^\(/, tokensEnum.LEFT_PARENT],
   [/^\)/, tokensEnum.RIGHT_PARENT],
@@ -34,6 +38,7 @@ const spec = [
   [/^[+\-]/, tokensEnum.ADDITIVE_OPERATOR],
   [/^[*\/]/, tokensEnum.MULTIPLICATIVE_OPERATOR],
 ];
+
 export class Tokenizer {
   init(string) {
     this._string = string;
