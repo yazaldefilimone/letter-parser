@@ -8,6 +8,9 @@ export const tokensEnum = {
   IDENTIFIER: `IDENTIFIER`,
   RIGHT_BRACE: `}`,
   LEFT_PARENT: `(`,
+  SIMPLE_ASSIGNMENT: `SIMPLE_ASSIGNMENT`,
+  COMPLEX_ASSIGNMENT: `COMPLEX_ASSIGNMENT`,
+
   RIGHT_PARENT: `)`,
 };
 const spec = [
@@ -30,6 +33,10 @@ const spec = [
   [/^\}/, tokensEnum.RIGHT_BRACE],
   // identifier
   [/^\w+/, tokensEnum.IDENTIFIER],
+  //  simple assignments
+  [/^=/, tokensEnum.SIMPLE_ASSIGNMENT],
+  // complex assignments
+  [/^(\+=|-=|\*=|\/=)/, tokensEnum.COMPLEX_ASSIGNMENT],
 
   //
   [/^\(/, tokensEnum.LEFT_PARENT],

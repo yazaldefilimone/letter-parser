@@ -1,12 +1,21 @@
 import { ASTTypes } from '../src/parser.js';
 
 export default (test) => {
-  const assignment = `let x = (2+3) * 2`;
+  const assignment = `x = 2;`;
   const assignmentExpression = {
     type: 'Program',
     body: [
       {
-        type: ASTTypes.EmptyStatement,
+        type: ASTTypes.BinaryExpression,
+        operator: '=',
+        left: {
+          type: ASTTypes.Identifier,
+          name: 'x',
+        },
+        right: {
+          type: ASTTypes.NumericLiteral,
+          value: 2,
+        },
       },
     ],
   };

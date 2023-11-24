@@ -8,6 +8,7 @@ export const ASTTypes = {
   BlockStatement: `BlockStatement`,
   EmptyStatement: `EmptyStatement`,
   BinaryExpression: `BinaryExpression`,
+  Identifier: `Identifier`,
 };
 
 export class Parser {
@@ -63,9 +64,29 @@ export class Parser {
         return this.EmptyStatement();
       case tokensEnum.LEFT_BRACE:
         return this.BlockStatement();
+      // case tokensEnum.IDENTIFIER:
+      //   return this.LetStatement();
       default:
         return this.ExpressionStatement();
     }
+  }
+  AssignmentExpression() {
+    const leftToken = this.AdditiveExpression();
+    if (!this._isOperator(this._lookAhead.type)) {
+      return leftToken;
+    }
+
+    const operator = this._lookAhead.value;
+    this._eat(this._lookAhead.type);
+
+    const rightToken = this.AdditiveExpression();
+
+    return {
+      type: ASTTypes.AssignmentExpression,
+      left: leftToken,
+      operator,
+      right: rightToken,
+    };
   }
   ExpressionStatement() {
     const expression = this.Expression();
@@ -93,7 +114,7 @@ export class Parser {
     };
   }
   Expression() {
-    return this.AdditiveExpression();
+    return this.AssignmentExpression();
   }
   EmptyStatement() {
     this._eat(tokensEnum.SEMICOLON);
@@ -134,6 +155,8 @@ export class Parser {
         return this.NumericLiteral();
       case tokensEnum.STRING:
         return this.StringLiteral();
+      case tokensEnum.IDENTIFIER:
+        return this.Identifier();
       default:
         throw new SyntaxError('Literal: unexpected literal production, receive ' + this._lookAhead.type);
     }
@@ -152,6 +175,9 @@ export class Parser {
     };
   }
 
+  LetStatement() {
+    const letToken = this._eat(tokensEnum.le);
+  }
   StringLiteral() {
     const token = this._eat(tokensEnum.STRING);
     return {
@@ -160,17 +186,35 @@ export class Parser {
     };
   }
 
+  Identifier() {
+    const token = this._eat(tokensEnum.IDENTIFIER);
+    return {
+      type: ASTTypes.Identifier,
+      value: token.value,
+    };
+  }
+
   _eat(type) {
     const token = this._lookAhead;
     if (token === null) {
       throw SyntaxError(`Unexpected end of input, expected ${type}`);
     }
+
     if (token.type !== type) {
       throw SyntaxError(`Unexpected token ${token.type}, expected ${type}`);
     }
     //  advance to next token
     this._lookAhead = this._tokenizer.getNextToken();
     return token;
+  }
+  _isOperator(tokenType) {
+    switch (tokenType) {
+      case tokensEnum.COMPLEX_ASSIGNMENT:
+      case tokensEnum.SIMPLE_ASSIGNMENT:
+        return true;
+      default:
+        return false;
+    }
   }
   _BinaryExpression(builder, tokenEnum) {
     let left = this[builder]();
