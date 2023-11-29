@@ -8,6 +8,7 @@ export const ASTTypes = {
   BlockStatement: `BlockStatement`,
   EmptyStatement: `EmptyStatement`,
   BinaryExpression: `BinaryExpression`,
+  AssignmentExpression: `AssignmentExpression`,
   Identifier: `Identifier`,
 };
 
@@ -64,29 +65,35 @@ export class Parser {
         return this.EmptyStatement();
       case tokensEnum.LEFT_BRACE:
         return this.BlockStatement();
-      // case tokensEnum.IDENTIFIER:
-      //   return this.LetStatement();
       default:
         return this.ExpressionStatement();
     }
   }
   AssignmentExpression() {
     const leftToken = this.AdditiveExpression();
-    if (!this._isOperator(this._lookAhead.type)) {
+    if (!this._isAssignmentOperator(this._lookAhead.type)) {
       return leftToken;
     }
+    const operator = this.AssignmentOperator().value;
 
-    const operator = this._lookAhead.value;
-    this._eat(this._lookAhead.type);
-
-    const rightToken = this.AdditiveExpression();
+    const rightToken = this.AssignmentExpression();
 
     return {
       type: ASTTypes.AssignmentExpression,
-      left: leftToken,
+      left: this._checkLeftAssignment(leftToken),
       operator,
       right: rightToken,
     };
+  }
+  AssignmentOperator() {
+    if (this._lookAhead.type === tokensEnum.COMPLEX_ASSIGNMENT) {
+      return this._eat(tokensEnum.COMPLEX_ASSIGNMENT);
+    }
+    return this._eat(tokensEnum.SIMPLE_ASSIGNMENT);
+  }
+
+  LeftHandSideExpression() {
+    return this.Identifier();
   }
   ExpressionStatement() {
     const expression = this.Expression();
@@ -99,7 +106,6 @@ export class Parser {
 
   BlockStatement() {
     this._eat(tokensEnum.LEFT_BRACE);
-
     let body;
     if (this._lookAhead.type !== tokensEnum.RIGHT_BRACE) {
       body = this.StatementList(tokensEnum.RIGHT_BRACE);
@@ -138,10 +144,13 @@ export class Parser {
    * ;
    */
   PrimaryExpression() {
+    if (this._isLiteral(this._lookAhead.type)) {
+      return this.Literal();
+    }
     if (this._lookAhead.type === tokensEnum.LEFT_PARENT) {
       return this.ParenthesizedExpression();
     }
-    return this.Literal();
+    return this.LeftHandSideExpression();
   }
   ParenthesizedExpression() {
     this._eat(tokensEnum.LEFT_PARENT);
@@ -155,8 +164,6 @@ export class Parser {
         return this.NumericLiteral();
       case tokensEnum.STRING:
         return this.StringLiteral();
-      case tokensEnum.IDENTIFIER:
-        return this.Identifier();
       default:
         throw new SyntaxError('Literal: unexpected literal production, receive ' + this._lookAhead.type);
     }
@@ -190,7 +197,7 @@ export class Parser {
     const token = this._eat(tokensEnum.IDENTIFIER);
     return {
       type: ASTTypes.Identifier,
-      value: token.value,
+      name: token.value,
     };
   }
 
@@ -207,14 +214,17 @@ export class Parser {
     this._lookAhead = this._tokenizer.getNextToken();
     return token;
   }
-  _isOperator(tokenType) {
-    switch (tokenType) {
-      case tokensEnum.COMPLEX_ASSIGNMENT:
-      case tokensEnum.SIMPLE_ASSIGNMENT:
-        return true;
-      default:
-        return false;
+  _isAssignmentOperator(tokenType) {
+    return tokenType === tokensEnum.COMPLEX_ASSIGNMENT || tokenType === tokensEnum.SIMPLE_ASSIGNMENT;
+  }
+  _checkLeftAssignment(left) {
+    if (left.type === ASTTypes.Identifier) {
+      return left;
     }
+    throw SyntaxError(`Left side of assignment must be a variable`);
+  }
+  _isLiteral(tokenType) {
+    return tokenType === tokensEnum.NUMBER || tokenType === tokensEnum.STRING;
   }
   _BinaryExpression(builder, tokenEnum) {
     let left = this[builder]();
