@@ -36,7 +36,7 @@ const spec = [
   //  simple assignments
   [/^=/, tokensEnum.SIMPLE_ASSIGNMENT],
   // complex assignments
-  [/^(\+=|-=|\*=|\/=)/, tokensEnum.COMPLEX_ASSIGNMENT],
+  [/^[\+\/\*\-]=/, tokensEnum.COMPLEX_ASSIGNMENT],
 
   //
   [/^\(/, tokensEnum.LEFT_PARENT],
