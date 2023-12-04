@@ -36,14 +36,14 @@ const spec = [
   //  simple assignments
   [/^=/, tokensEnum.SIMPLE_ASSIGNMENT],
   // complex assignments
-  [/^[\+\/\*\-]=/, tokensEnum.COMPLEX_ASSIGNMENT],
+  [/^[+/*-]=/, tokensEnum.COMPLEX_ASSIGNMENT],
 
   //
   [/^\(/, tokensEnum.LEFT_PARENT],
   [/^\)/, tokensEnum.RIGHT_PARENT],
   // math: -/+
-  [/^[+\-]/, tokensEnum.ADDITIVE_OPERATOR],
-  [/^[*\/]/, tokensEnum.MULTIPLICATIVE_OPERATOR],
+  [/^[+/-]/, tokensEnum.ADDITIVE_OPERATOR],
+  [/^[*/]/, tokensEnum.MULTIPLICATIVE_OPERATOR],
 ];
 
 export class Tokenizer {
