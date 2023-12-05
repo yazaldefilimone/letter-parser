@@ -10,6 +10,10 @@ export const ASTTypes = {
   BinaryExpression: `BinaryExpression`,
   AssignmentExpression: `AssignmentExpression`,
   Identifier: `Identifier`,
+  IfStatement: `IfStatement`,
+  VariableStatement: `VariableStatement`,
+  VariableDeclaration: `VariableDeclaration`,
+  VariableDeclarator: `VariableDeclarator`,
 };
 
 export class Parser {
