@@ -10,10 +10,17 @@ export const tokensEnum = {
   LEFT_PARENT: `(`,
   SIMPLE_ASSIGNMENT: `SIMPLE_ASSIGNMENT`,
   COMPLEX_ASSIGNMENT: `COMPLEX_ASSIGNMENT`,
-
   RIGHT_PARENT: `)`,
+  IF: `if`,
+  ELSE: `else`,
+  LET: `let`,
+  COMMA: `,`,
 };
 const spec = [
+  // keywords
+  [/^\blet\b/, tokensEnum.LET],
+  [/^\bif\b/, tokensEnum.IF],
+  [/^\belse\b/, tokensEnum.ELSE],
   // numbers
   [/^\d+/, tokensEnum.NUMBER],
   // strings ""
@@ -31,6 +38,8 @@ const spec = [
   // block
   [/^\{/, tokensEnum.LEFT_BRACE],
   [/^\}/, tokensEnum.RIGHT_BRACE],
+  // comma
+  [/^,/, tokensEnum.COMMA],
   // identifier
   [/^\w+/, tokensEnum.IDENTIFIER],
   //  simple assignments
