@@ -69,9 +69,52 @@ export class Parser {
         return this.EmptyStatement();
       case tokensEnum.LEFT_BRACE:
         return this.BlockStatement();
+      case tokensEnum.LET:
+        return this.VariableStatement();
+      // case tokensEnum.IF:
+      // return this.IfStatement();
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  VariableStatement() {
+    const letKeyword = this._eat(tokensEnum.LET);
+    const declarations = this.VariableDeclarationList();
+    this._eat(tokensEnum.SEMICOLON);
+    return {
+      type: ASTTypes.VariableStatement,
+      declarations,
+    };
+  }
+  VariableDeclarationList() {
+    const declarations = [this.VariableDeclaration()];
+    while (this._lookAhead.type === tokensEnum.COMMA) {
+      this._eat(tokensEnum.COMMA);
+      declarations.push(this.VariableDeclaration());
+    }
+    return declarations;
+  }
+
+  VariableDeclaration() {
+    const id = this.Identifier();
+    let init = null;
+    if (this._lookAhead.type === tokensEnum.SIMPLE_ASSIGNMENT) {
+      init = this.VariableInitializer();
+    }
+    // if (this._lookAhead.type !== tokensEnum.COMMA && this._lookAhead.type !== tokensEnum.SEMICOLON) {
+    //   init = this.VariableInitializer();
+    // }
+    return {
+      type: ASTTypes.VariableDeclaration,
+      id,
+      init,
+    };
+  }
+
+  VariableInitializer() {
+    this._eat(tokensEnum.SIMPLE_ASSIGNMENT);
+    return this.AssignmentExpression();
   }
   AssignmentExpression() {
     const leftToken = this.AdditiveExpression();
