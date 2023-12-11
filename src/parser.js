@@ -228,10 +228,6 @@ export class Parser {
       value: token.value,
     };
   }
-
-  LetStatement() {
-    const letToken = this._eat(tokensEnum.le);
-  }
   StringLiteral() {
     const token = this._eat(tokensEnum.STRING);
     return {
