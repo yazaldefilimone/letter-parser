@@ -10,6 +10,13 @@ const imports = files.map(async (curr) => await import(`./${curr}`));
 const exec = () => {
   const program = `
    let x = b = 10;
+   if (x >= 10) {
+    x = 20;
+   } else {
+    x = 30;
+   }
+
+   2 + 2 > 2;
   `;
   const ast = parser.parse(program);
   console.log(JSON.stringify(ast, null, 2));
