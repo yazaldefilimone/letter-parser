@@ -11,10 +11,14 @@ export const tokensEnum = {
   LEFT_PARENT: `(`,
   SIMPLE_ASSIGNMENT: `SIMPLE_ASSIGNMENT`,
   COMPLEX_ASSIGNMENT: `COMPLEX_ASSIGNMENT`,
+  EQUALITY_OPERATOR: `EQUALITY_OPERATOR`,
   RIGHT_PARENT: `)`,
   IF: `if`,
   ELSE: `else`,
   LET: `let`,
+  TRUE: `true`,
+  FALSE: `false`,
+  NULL: `null`,
   COMMA: `,`,
 };
 const spec = [
@@ -22,6 +26,9 @@ const spec = [
   [/^\blet\b/, tokensEnum.LET],
   [/^\bif\b/, tokensEnum.IF],
   [/^\belse\b/, tokensEnum.ELSE],
+  [/^\btrue\b/, tokensEnum.TRUE],
+  [/^\bfalse\b/, tokensEnum.FALSE],
+  [/^\bnull\b/, tokensEnum.NULL],
   // numbers
   [/^\d+/, tokensEnum.NUMBER],
   // strings ""
@@ -45,6 +52,8 @@ const spec = [
   [/^,/, tokensEnum.COMMA],
   // identifier
   [/^\w+/, tokensEnum.IDENTIFIER],
+  // equality operators = == !=
+  [/^[=!]=/, tokensEnum.EQUALITY_OPERATOR],
   //  simple assignments
   [/^=/, tokensEnum.SIMPLE_ASSIGNMENT],
   // complex assignments
