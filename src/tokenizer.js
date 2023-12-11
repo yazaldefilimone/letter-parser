@@ -2,6 +2,7 @@ export const tokensEnum = {
   NUMBER: 'NUMBER',
   STRING: `STRING`,
   ADDITIVE_OPERATOR: `ADDITIVE_OPERATOR`,
+  RELATIONAL_OPERATOR: `RELATIONAL_OPERATOR`,
   MULTIPLICATIVE_OPERATOR: `MULTIPLICATIVE_OPERATOR`,
   SEMICOLON: `;`,
   LEFT_BRACE: `{`,
@@ -38,6 +39,8 @@ const spec = [
   // block
   [/^\{/, tokensEnum.LEFT_BRACE],
   [/^\}/, tokensEnum.RIGHT_BRACE],
+  // relational operators
+  [/^[<>]=?/, tokensEnum.RELATIONAL_OPERATOR],
   // comma
   [/^,/, tokensEnum.COMMA],
   // identifier
