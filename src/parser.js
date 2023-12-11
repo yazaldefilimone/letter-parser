@@ -14,6 +14,7 @@ export const ASTTypes = {
   VariableStatement: `VariableStatement`,
   VariableDeclaration: `VariableDeclaration`,
   VariableDeclarator: `VariableDeclarator`,
+  BinaryExpression: `BinaryExpression`,
 };
 
 export class Parser {
@@ -71,13 +72,32 @@ export class Parser {
         return this.BlockStatement();
       case tokensEnum.LET:
         return this.VariableStatement();
-      // case tokensEnum.IF:
-      // return this.IfStatement();
+      case tokensEnum.IF:
+        return this.IfStatement();
       default:
         return this.ExpressionStatement();
     }
   }
-
+  IfStatement() {
+    const ifKeyword = this._eat(tokensEnum.IF);
+    const test = this.ParenthesizedExpression();
+    const consequent = this.Statement();
+    let alternate = this.ElseStatement();
+    return {
+      type: ASTTypes.IfStatement,
+      test,
+      consequent,
+      alternate,
+    };
+  }
+  ElseStatement() {
+    if (this._lookAhead.type !== tokensEnum.ELSE) {
+      return null;
+    }
+    const elseKeyword = this._eat(tokensEnum.ELSE);
+    const statement = this.Statement();
+    return statement;
+  }
   VariableStatement() {
     const letKeyword = this._eat(tokensEnum.LET);
     const declarations = this.VariableDeclarationList();
@@ -117,7 +137,7 @@ export class Parser {
     return this.AssignmentExpression();
   }
   AssignmentExpression() {
-    const leftToken = this.AdditiveExpression();
+    const leftToken = this.RelationalExpression();
     if (!this._isAssignmentOperator(this._lookAhead.type)) {
       return leftToken;
     }
@@ -132,9 +152,16 @@ export class Parser {
       right: rightToken,
     };
   }
+  // relational operators:  <, >, <=, >=
+  RelationalExpression() {
+    return this._BinaryExpression('AdditiveExpression', tokensEnum.RELATIONAL_OPERATOR);
+  }
   AssignmentOperator() {
     if (this._lookAhead.type === tokensEnum.COMPLEX_ASSIGNMENT) {
       return this._eat(tokensEnum.COMPLEX_ASSIGNMENT);
+    }
+    if (this._lookAhead.type === tokensEnum.RELATIONAL_OPERATOR) {
+      return this._eat(tokensEnum.RELATIONAL_OPERATOR);
     }
     return this._eat(tokensEnum.SIMPLE_ASSIGNMENT);
   }
