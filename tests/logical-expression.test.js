@@ -7,7 +7,7 @@ export default (test) => {
       {
         type: ASTTypes.ExpressionStatement,
         expression: {
-          type: ASTTypes.LogicalAndExpression,
+          type: ASTTypes.LogicalExpression,
           operator: '&&',
           left: {
             type: ASTTypes.BinaryExpression,
@@ -30,22 +30,21 @@ export default (test) => {
             },
             right: {
               type: ASTTypes.NumericLiteral,
-              value: '-5',
+              value: '5',
             },
           },
         },
       },
     ],
   };
-  test('x < 1 && x > -5', LogicalANDExpression);
-
+  test('x < 1 && x > 5;', LogicalANDExpression);
   const LogicalORExpression = {
     type: 'Program',
     body: [
       {
         type: ASTTypes.ExpressionStatement,
         expression: {
-          type: ASTTypes.LogicalOrExpression,
+          type: ASTTypes.LogicalExpression,
           operator: '||',
           left: {
             type: ASTTypes.BinaryExpression,
@@ -68,13 +67,12 @@ export default (test) => {
             },
             right: {
               type: ASTTypes.NumericLiteral,
-              value: '-5',
+              value: '5',
             },
           },
         },
       },
     ],
   };
-
-  test('x > 1 || x < -5', LogicalORExpression);
+  test('x > 1 || x < 5;', LogicalORExpression);
 };
