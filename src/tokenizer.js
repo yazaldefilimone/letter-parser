@@ -23,6 +23,7 @@ export const tokensEnum = {
   // logical operators
   LOGICAL_AND: `LOGICAL_AND`,
   LOGICAL_OR: `LOGICAL_OR`,
+  LOGICAL_NOT: `LOGICAL_NOT`,
 };
 const spec = [
   // keywords
@@ -64,6 +65,7 @@ const spec = [
   // logical operators
   [/^&&/, tokensEnum.LOGICAL_AND],
   [/^\|\|/, tokensEnum.LOGICAL_OR],
+  [/^!/, tokensEnum.LOGICAL_NOT],
   //
   [/^\(/, tokensEnum.LEFT_PARENT],
   [/^\)/, tokensEnum.RIGHT_PARENT],
