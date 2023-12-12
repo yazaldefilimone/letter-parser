@@ -20,6 +20,9 @@ export const tokensEnum = {
   FALSE: `false`,
   NULL: `null`,
   COMMA: `,`,
+  // logical operators
+  LOGICAL_AND: `LOGICAL_AND`,
+  LOGICAL_OR: `LOGICAL_OR`,
 };
 const spec = [
   // keywords
@@ -65,6 +68,9 @@ const spec = [
   // math: -/+
   [/^[+/-]/, tokensEnum.ADDITIVE_OPERATOR],
   [/^[*/]/, tokensEnum.MULTIPLICATIVE_OPERATOR],
+  // logical operators
+  [/^&&/, tokensEnum.LOGICAL_AND],
+  [/^\|\|/, tokensEnum.LOGICAL_OR],
 ];
 
 export class Tokenizer {
