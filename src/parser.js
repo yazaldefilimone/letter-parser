@@ -17,6 +17,8 @@ export const ASTTypes = {
   BinaryExpression: `BinaryExpression`,
   BooleanLiteral: `BooleanLiteral`,
   NullLiteral: `NullLiteral`,
+  LogicalAndExpression: `LogicalAndExpression`,
+  LogicalOrExpression: `LogicalOrExpression`,
 };
 
 export class Parser {
