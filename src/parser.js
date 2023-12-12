@@ -17,8 +17,7 @@ export const ASTTypes = {
   BinaryExpression: `BinaryExpression`,
   BooleanLiteral: `BooleanLiteral`,
   NullLiteral: `NullLiteral`,
-  LogicalAndExpression: `LogicalAndExpression`,
-  LogicalOrExpression: `LogicalOrExpression`,
+  LogicalExpression: `LogicalExpression`,
 };
 
 export class Parser {
@@ -178,7 +177,7 @@ export class Parser {
    * ;
    */
   AssignmentExpression() {
-    const leftToken = this.EqualityExpression();
+    const leftToken = this.LogicalOrExpression();
     if (!this._isAssignmentOperator(this._lookAhead.type)) {
       return leftToken;
     }
@@ -194,9 +193,9 @@ export class Parser {
     };
   }
   /*
-   * EqualityExpression
-   * : RelationalExpression
-   * | EqualityExpression EQUALITY_OPERATOR RelationalExpression ( <, >, <=, >=)
+   * RelationalExpression
+   * : AdditiveExpression
+   * | EqualityExpression EQUALITY_OPERATOR RelationalExpression
    * ;
    */
   RelationalExpression() {
@@ -227,6 +226,27 @@ export class Parser {
   LeftHandSideExpression() {
     return this.Identifier();
   }
+
+  /*
+   * LogicalAndExpression
+   * : EqualityExpression LOGICAL_AND LogicalAndExpression
+   * | EqualityExpression
+   * ;
+   */
+  LogicalAndExpression() {
+    return this._LogicalExpression('EqualityExpression', tokensEnum.LOGICAL_AND);
+  }
+
+  /*
+   * LogicalOrExpression
+   * : EqualityExpression LOGICAL_OR LogicalOrExpression
+   * | EqualityExpression
+   * ;
+   */
+  LogicalOrExpression() {
+    return this._LogicalExpression('LogicalAndExpression', tokensEnum.LOGICAL_OR);
+  }
+
   /*
    * ExpressionStatement
    * : Expression SEMICOLON
@@ -458,11 +478,25 @@ export class Parser {
   _BinaryExpression(builder, tokenEnum) {
     let left = this[builder]();
     while (this._lookAhead.type === tokensEnum[tokenEnum]) {
-      // + / -
       const operator = this._eat(tokensEnum[tokenEnum]).value;
       const right = this[builder]();
       left = {
         type: ASTTypes.BinaryExpression,
+        left,
+        operator,
+        right,
+      };
+    }
+    return left;
+  }
+
+  _LogicalExpression(builder, tokenEnum) {
+    let left = this[builder]();
+    if (this._lookAhead.type === tokensEnum[tokenEnum]) {
+      const operator = this._eat(tokensEnum[tokenEnum]).value;
+      const right = this[builder]();
+      left = {
+        type: ASTTypes.LogicalExpression,
         left,
         operator,
         right,
