@@ -28,4 +28,4 @@ const testRun = async () => {
   console.log('All source tests passed!');
 };
 exec();
-// testRun();
+testRun();
