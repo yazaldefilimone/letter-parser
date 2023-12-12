@@ -46,7 +46,7 @@ export default (test) => {
   };
   const code2 = 'x != 2;';
   test(code2, isNotEqual);
-  const code3 = 'x +1 == true;';
+  const code3 = 'x + 1 == true;';
 
   const equalityWithBoolean = {
     type: 'Program',
