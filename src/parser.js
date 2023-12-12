@@ -52,11 +52,11 @@ export class Parser {
    * ;
    */
   StatementList(stopLookToken = null) {
-    const nodes = [this.Statement()];
+    const stememants = [this.Statement()];
     while (this._lookAhead !== null && this._lookAhead.type !== stopLookToken) {
-      nodes.push(this.Statement());
+      stememants.push(this.Statement());
     }
-    return nodes;
+    return stememants;
   }
   /**
    *
@@ -81,10 +81,10 @@ export class Parser {
     }
   }
   /*
-    * IfStatement
-    * : IF ParenthesizedExpression Statement ElseStatement
-    * ;
-    /
+   * IfStatement
+   * : IF ParenthesizedExpression Statement ElseStatement
+   * ;
+   */
   IfStatement() {
     const ifKeyword = this._eat(tokensEnum.IF);
     const test = this.ParenthesizedExpression();
@@ -267,9 +267,10 @@ export class Parser {
     return this.AssignmentExpression();
   }
   /*
-    * EmptyStatement
-    * : SEMICOLON
-    * ;
+   * EmptyStatement
+   * : SEMICOLON
+   * ;
+   */
   EmptyStatement() {
     this._eat(tokensEnum.SEMICOLON);
     return {
@@ -374,8 +375,8 @@ export class Parser {
    * ;
    * */
   BooleanLiteral(value) {
-    const tokenEnum = value ? tokensEnum.TRUE : tokensEnum.FALSE;
-    const booleanKeyword = this._eat(tokensEnum[tokenEnum]);
+    const token = value ? tokensEnum.TRUE : tokensEnum.FALSE;
+    const booleanKeyword = this._eat(token);
     return {
       type: ASTTypes.BooleanLiteral,
       value,
