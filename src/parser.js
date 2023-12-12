@@ -18,6 +18,7 @@ export const ASTTypes = {
   BooleanLiteral: `BooleanLiteral`,
   NullLiteral: `NullLiteral`,
   LogicalExpression: `LogicalExpression`,
+  UnaryExpression: `UnaryExpression`,
 };
 
 export class Parser {
@@ -171,9 +172,55 @@ export class Parser {
     return this.AssignmentExpression();
   }
   /*
+   * AssignmentOperator
+   * : SIMPLE_ASSIGNMENT
+   * | COMPLEX_ASSIGNMENT
+   * | RELATIONAL_OPERATOR
+   * ;
+   */
+  AssignmentOperator() {
+    if (this._lookAhead.type === tokensEnum.COMPLEX_ASSIGNMENT) {
+      return this._eat(tokensEnum.COMPLEX_ASSIGNMENT);
+    }
+    if (this._lookAhead.type === tokensEnum.RELATIONAL_OPERATOR) {
+      return this._eat(tokensEnum.RELATIONAL_OPERATOR);
+    }
+    return this._eat(tokensEnum.SIMPLE_ASSIGNMENT);
+  }
+  /*
+   * UnaryExpression
+   * : LeftHandSideExpression
+   * | ADDITIVE_OPERATOR UnaryExpression
+   * | LOGICAL_NOT UnaryExpression
+   */
+  UnaryExpression() {
+    let operator = null;
+    let prefix = false;
+    switch (this._lookAhead.type) {
+      case tokensEnum.ADDITIVE_OPERATOR:
+        operator = this._eat(tokensEnum.ADDITIVE_OPERATOR).value;
+        prefix = true;
+        break;
+      case tokensEnum.LOGICAL_NOT:
+        operator = this._eat(tokensEnum.LOGICAL_NOT).value;
+        prefix = true;
+        break;
+    }
+    if (operator !== null) {
+      const argument = this.UnaryExpression();
+      return {
+        type: ASTTypes.UnaryExpression,
+        operator,
+        argument,
+        prefix,
+      };
+    }
+    return this.LeftHandSideExpression();
+  }
+  /*
    * AssignmentExpression
-   * : LeftHandSideExpression AssignmentOperator AssignmentExpression
-   * | EqualityExpression
+   * : LogicalOrExpression AssignmentOperator AssignmentExpression
+   * | LogicalOrExpression
    * ;
    */
   AssignmentExpression() {
@@ -201,30 +248,15 @@ export class Parser {
   RelationalExpression() {
     return this._BinaryExpression('AdditiveExpression', tokensEnum.RELATIONAL_OPERATOR);
   }
-  /*
-   * AssignmentOperator
-   * : SIMPLE_ASSIGNMENT
-   * | COMPLEX_ASSIGNMENT
-   * | RELATIONAL_OPERATOR
-   * ;
-   */
-  AssignmentOperator() {
-    if (this._lookAhead.type === tokensEnum.COMPLEX_ASSIGNMENT) {
-      return this._eat(tokensEnum.COMPLEX_ASSIGNMENT);
-    }
-    if (this._lookAhead.type === tokensEnum.RELATIONAL_OPERATOR) {
-      return this._eat(tokensEnum.RELATIONAL_OPERATOR);
-    }
-    return this._eat(tokensEnum.SIMPLE_ASSIGNMENT);
-  }
+
   /*
    * LeftHandSideExpression
-   * : Identifier
+   * : PrimaryExpression
    * ;
    */
 
   LeftHandSideExpression() {
-    return this.Identifier();
+    return this.PrimaryExpression();
   }
 
   /*
@@ -325,31 +357,9 @@ export class Parser {
    * ;
    */
   MultiplicativeExpression() {
-    return this._BinaryExpression('PrimaryExpression', tokensEnum.MULTIPLICATIVE_OPERATOR);
+    return this._BinaryExpression('UnaryExpression', tokensEnum.MULTIPLICATIVE_OPERATOR);
   }
-  /**
-   *
-   * Literal
-   * :NumericLiteral
-   * |StringLiteral
-   * ;
-   */
-  Literal() {
-    switch (this._lookAhead.type) {
-      case tokensEnum.NUMBER:
-        return this.NumericLiteral();
-      case tokensEnum.STRING:
-        return this.StringLiteral();
-      case tokensEnum.NULL:
-        return this.NullLiteral();
-      case tokensEnum.TRUE:
-        return this.BooleanLiteral(true);
-      case tokensEnum.FALSE:
-        return this.BooleanLiteral(false);
-      default:
-        throw new SyntaxError('Literal: unexpected literal production, receive ' + this._lookAhead.type);
-    }
-  }
+
   /*
    * PrimaryExpression
    * : Literal
@@ -361,10 +371,14 @@ export class Parser {
     if (this._isLiteral(this._lookAhead.type)) {
       return this.Literal();
     }
-    if (this._lookAhead.type === tokensEnum.LEFT_PARENT) {
-      return this.ParenthesizedExpression();
+    switch (this._lookAhead.type) {
+      case tokensEnum.LEFT_PARENT:
+        return this.ParenthesizedExpression();
+      case tokensEnum.IDENTIFIER:
+        return this.Identifier();
+      default:
+        return this.LeftHandSideExpression();
     }
-    return this.LeftHandSideExpression();
   }
   /*
    * ParenthesizedExpression
@@ -428,6 +442,29 @@ export class Parser {
       type: ASTTypes.StringLiteral,
       value: token.value.slice(1, -1),
     };
+  }
+  /**
+   *
+   * Literal
+   * :NumericLiteral
+   * |StringLiteral
+   * ;
+   */
+  Literal() {
+    switch (this._lookAhead.type) {
+      case tokensEnum.NUMBER:
+        return this.NumericLiteral();
+      case tokensEnum.STRING:
+        return this.StringLiteral();
+      case tokensEnum.NULL:
+        return this.NullLiteral();
+      case tokensEnum.TRUE:
+        return this.BooleanLiteral(true);
+      case tokensEnum.FALSE:
+        return this.BooleanLiteral(false);
+      default:
+        throw new SyntaxError('Literal: unexpected literal production, receive ' + this._lookAhead.type);
+    }
   }
   /*
    * Identifier
