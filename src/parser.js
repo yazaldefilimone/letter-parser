@@ -15,6 +15,7 @@ export const ASTTypes = {
   VariableDeclaration: `VariableDeclaration`,
   VariableDeclarator: `VariableDeclarator`,
   BinaryExpression: `BinaryExpression`,
+  BooleanLiteral: `BooleanLiteral`,
 };
 
 export class Parser {
@@ -137,7 +138,7 @@ export class Parser {
     return this.AssignmentExpression();
   }
   AssignmentExpression() {
-    const leftToken = this.RelationalExpression();
+    const leftToken = this.EqualityExpression();
     if (!this._isAssignmentOperator(this._lookAhead.type)) {
       return leftToken;
     }
@@ -202,7 +203,9 @@ export class Parser {
       type: ASTTypes.EmptyStatement,
     };
   }
-
+  EqualityExpression() {
+    return this._BinaryExpression('RelationalExpression', tokensEnum.EQUALITY_OPERATOR);
+  }
   AdditiveExpression() {
     return this._BinaryExpression('MultiplicativeExpression', tokensEnum.ADDITIVE_OPERATOR);
   }
