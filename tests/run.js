@@ -9,7 +9,7 @@ const imports = files.map(async (curr) => await import(`./${curr}`));
 
 const exec = () => {
   const program = `
-  //  2 + 2 > 2;
+   2 + 2 > 2;
    2 == true;
   `;
   const ast = parser.parse(program);
