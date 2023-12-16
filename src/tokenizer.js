@@ -24,6 +24,9 @@ export const tokensEnum = {
   LOGICAL_AND: `LOGICAL_AND`,
   LOGICAL_OR: `LOGICAL_OR`,
   LOGICAL_NOT: `LOGICAL_NOT`,
+  WHILE: `while`,
+  DO: `do`,
+  FOR: `for`,
 };
 const spec = [
   // keywords
@@ -33,6 +36,9 @@ const spec = [
   [/^\btrue\b/, tokensEnum.TRUE],
   [/^\bfalse\b/, tokensEnum.FALSE],
   [/^\bnull\b/, tokensEnum.NULL],
+  [/^\bwhile\b/, tokensEnum.WHILE],
+  [/^\bdo\b/, tokensEnum.DO],
+  [/^\bfor\b/, tokensEnum.FOR],
   // numbers
   [/^\d+/, tokensEnum.NUMBER],
   // strings ""
