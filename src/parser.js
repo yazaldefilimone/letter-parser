@@ -19,6 +19,7 @@ export const ASTTypes = {
   NullLiteral: `NullLiteral`,
   LogicalExpression: `LogicalExpression`,
   UnaryExpression: `UnaryExpression`,
+  WhileStatement: `WhileStatement`,
 };
 
 export class Parser {
@@ -66,22 +67,87 @@ export class Parser {
    * : ExpressionStatement
    * | BlockStatement
    * | EmptyStatement
+   * | IfStatement
+   * | VariableStatement
+   * | IterationStatement
    * ;
    */
   Statement() {
     switch (this._lookAhead.type) {
-      case tokensEnum.SEMICOLON:
+      case tokensEnum.SEMICOLON: {
         return this.EmptyStatement();
-      case tokensEnum.LEFT_BRACE:
+      }
+      case tokensEnum.LEFT_BRACE: {
         return this.BlockStatement();
-      case tokensEnum.LET:
+      }
+      case tokensEnum.LET: {
         return this.VariableStatement();
-      case tokensEnum.IF:
+      }
+      case tokensEnum.IF: {
         return this.IfStatement();
-      default:
+      }
+      case tokensEnum.WHILE:
+      case tokensEnum.DO:
+      case tokensEnum.FOR: {
+        return this.IterationStatement();
+      }
+      default: {
         return this.ExpressionStatement();
+      }
     }
   }
+
+  /**
+   * IterationStatement
+   * : WHILE ParenthesizedExpression Statement
+   * | DO Statement WHILE ParenthesizedExpression SEMICOLON
+   * | FOR LEFT_PARENT ExpressionStatement ExpressionStatement RIGHT_PARENT Statement
+   * ;
+   */
+
+  IterationStatement() {
+    switch (this._lookAhead.type) {
+      case tokensEnum.WHILE: {
+        return this.WhileStatement();
+      }
+      case tokensEnum.DO: {
+        return this.DoWhileStatement();
+      }
+      case tokensEnum.FOR: {
+        return this.ForStatement();
+      }
+    }
+  }
+  /**
+   * WhileStatement
+   * : WHILE ParenthesizedExpression Statement
+   * ;
+   */
+  WhileStatement() {
+    const whileKeyword = this._eat(tokensEnum.WHILE);
+    const test = this.ParenthesizedExpression();
+    const body = this.Statement();
+    return {
+      type: ASTTypes.WhileStatement,
+      test,
+      body,
+    };
+  }
+
+  /**
+   * DoWhileStatement
+   * : DO Statement WHILE ParenthesizedExpression SEMICOLON
+   * ;
+   */
+  DoWhileStatement() {}
+
+  /**
+   * ForStatement
+   * : FOR LEFT_PARENT ExpressionStatement ExpressionStatement RIGHT_PARENT Statement
+   * ;
+   */
+  ForStatement() {}
+
   /*
    * IfStatement
    * : IF ParenthesizedExpression Statement ElseStatement
