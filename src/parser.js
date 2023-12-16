@@ -20,6 +20,8 @@ export const ASTTypes = {
   LogicalExpression: `LogicalExpression`,
   UnaryExpression: `UnaryExpression`,
   WhileStatement: `WhileStatement`,
+  DoWhileStatement: `DoWhileStatement`,
+  ForStatement: `ForStatement`,
 };
 
 export class Parser {
@@ -139,7 +141,18 @@ export class Parser {
    * : DO Statement WHILE ParenthesizedExpression SEMICOLON
    * ;
    */
-  DoWhileStatement() {}
+  DoWhileStatement() {
+    const doWhileKeyword = this._eat(tokensEnum.DO);
+    const body = this.Statement();
+    const whileKeyword = this._eat(tokensEnum.WHILE);
+    const test = this.ParenthesizedExpression();
+    this._eat(tokensEnum.SEMICOLON);
+    return {
+      type: ASTTypes.DoWhileStatement,
+      body,
+      test,
+    };
+  }
 
   /**
    * ForStatement
