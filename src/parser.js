@@ -159,7 +159,22 @@ export class Parser {
    * : FOR LEFT_PARENT ExpressionStatement ExpressionStatement RIGHT_PARENT Statement
    * ;
    */
-  ForStatement() {}
+  ForStatement() {
+    const forKeyword = this._eat(tokensEnum.FOR);
+    this._eat(tokensEnum.LEFT_PARENT);
+    const init = this.ExpressionStatement();
+    const test = this.ExpressionStatement();
+    const update = this.Expression();
+    this._eat(tokensEnum.RIGHT_PARENT);
+    const body = this.Statement();
+    return {
+      type: ASTTypes.ForStatement,
+      init,
+      test,
+      update,
+      body,
+    };
+  }
 
   /*
    * IfStatement
