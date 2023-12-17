@@ -9,9 +9,8 @@ const imports = files.map(async (curr) => await import(`./${curr}`));
 
 const exec = () => {
   const program = `
-  def square() {
-    return;
-  }
+   str.length;
+    str[0];
   `;
   const ast = parser.parse(program);
   console.log(JSON.stringify(ast, null, 2));
