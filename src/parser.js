@@ -24,6 +24,7 @@ export const ASTTypes = {
   ForStatement: `ForStatement`,
 };
 
+const LiteralCache = new Map();
 export class Parser {
   constructor() {
     this._currentString;
@@ -35,7 +36,6 @@ export class Parser {
     this._currentString = string;
     return this.Program();
   }
-
   /**
    *
    * Main entry point
@@ -162,9 +162,11 @@ export class Parser {
   ForStatement() {
     const forKeyword = this._eat(tokensEnum.FOR);
     this._eat(tokensEnum.LEFT_PARENT);
-    const init = this.ExpressionStatement();
-    const test = this.ExpressionStatement();
-    const update = this.Expression();
+    const init = this._lookAhead.type === tokensEnum.SEMICOLON ? null : this.ForStatementInit();
+    this._eat(tokensEnum.SEMICOLON);
+    const test = this._lookAhead.type === tokensEnum.SEMICOLON ? null : this.Expression();
+    this._eat(tokensEnum.SEMICOLON);
+    const update = this._lookAhead.type === tokensEnum.RIGHT_PARENT ? null : this.Expression();
     this._eat(tokensEnum.RIGHT_PARENT);
     const body = this.Statement();
     return {
@@ -174,6 +176,19 @@ export class Parser {
       update,
       body,
     };
+  }
+
+  /**
+   * ForStatementInit
+   * : VariableStatement
+   * | ExpressionStatement
+   * ;
+   */
+  ForStatementInit() {
+    if (this._lookAhead.type === tokensEnum.LET) {
+      return this.VariableStatementInit();
+    }
+    return this.Expression();
   }
 
   /*
@@ -208,18 +223,28 @@ export class Parser {
     return statement;
   }
   /*
+   * VariableStatementInit
+   * : LET VariableDeclarationList
+   * ;
+   */
+
+  VariableStatementInit() {
+    const letKeyword = this._eat(tokensEnum.LET);
+    const declarations = this.VariableDeclarationList();
+    return {
+      type: ASTTypes.VariableStatement,
+      declarations,
+    };
+  }
+  /*
    * VariableStatement
    * : LET VariableDeclarationList SEMICOLON
    * ;
    */
   VariableStatement() {
-    const letKeyword = this._eat(tokensEnum.LET);
-    const declarations = this.VariableDeclarationList();
+    const variableStatement = this.VariableStatementInit();
     this._eat(tokensEnum.SEMICOLON);
-    return {
-      type: ASTTypes.VariableStatement,
-      declarations,
-    };
+    return variableStatement;
   }
   /*
    * VariableDeclarationList
