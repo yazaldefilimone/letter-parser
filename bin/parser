@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+'use strict';
+import { readFileSync } from 'fs';
+
+import { Parser } from '../src/parser.js';
+
+function bootstrap(argv) {
+  const [_node, _path, mode, expression] = argv;
+  let ast = null;
+  const parser = new Parser();
+  if (mode === '-f') {
+    const file = readFileSync(expression, 'utf8');
+    ast = parser.parse(file);
+  } else if (mode === '-e') {
+    ast = parser.parse(expression);
+  } else {
+    console.log('Invalid mode');
+    return;
+  }
+  console.log(JSON.stringify(ast, null, 2));
+}
+
+bootstrap(process.argv);
