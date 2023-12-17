@@ -24,6 +24,7 @@ export const ASTTypes = {
   ForStatement: `ForStatement`,
   FunctionDeclaration: `FunctionDeclaration`,
   ReturnStatement: `ReturnStatement`,
+  MemberExpression: `MemberExpression`,
 };
 
 // const LiteralCache = new Map();
@@ -77,6 +78,9 @@ export class Parser {
    * ;
    */
   Statement() {
+    if (this._lookAhead === null) {
+      return this.EmptyStatement(false);
+    }
     switch (this._lookAhead.type) {
       case tokensEnum.SEMICOLON: {
         return this.EmptyStatement();
@@ -438,9 +442,44 @@ export class Parser {
    */
 
   LeftHandSideExpression() {
-    return this.PrimaryExpression();
+    return this.MemberExpression();
   }
 
+  /*
+   * MemberExpression
+   * : PrimaryExpression
+   * | MemberExpression LEFT_BRACKET Expression RIGHT_BRACKET
+   * | MemberExpression DOT Identifier
+   */
+  MemberExpression() {
+    let object = this.PrimaryExpression();
+    while (this._lookAhead.type === tokensEnum.LEFT_BRACKET || this._lookAhead.type === tokensEnum.DOT) {
+      if (this._lookAhead.type === tokensEnum.LEFT_BRACKET) {
+        this._eat(tokensEnum.LEFT_BRACKET);
+        const property = this.Expression();
+        this._eat(tokensEnum.RIGHT_BRACKET);
+        object = {
+          type: ASTTypes.MemberExpression,
+          object,
+          property,
+          computed: true,
+        };
+      }
+
+      if (this._lookAhead.type === tokensEnum.DOT) {
+        this._eat(tokensEnum.DOT);
+        const property = this.Identifier();
+        object = {
+          type: ASTTypes.MemberExpression,
+          object,
+          property,
+          computed: false,
+        };
+      }
+    }
+
+    return object;
+  }
   /*
    * LogicalAndExpression
    * : EqualityExpression LOGICAL_AND LogicalAndExpression
@@ -507,13 +546,13 @@ export class Parser {
    * : SEMICOLON
    * ;
    */
-  EmptyStatement() {
-    this._eat(tokensEnum.SEMICOLON);
+  EmptyStatement(withSemicolon = true) {
+    if (withSemicolon) this._eat(tokensEnum.SEMICOLON);
     return {
       type: ASTTypes.EmptyStatement,
     };
   }
-  /*
+  /*s
    * EqualityExpression
    * : RelationalExpression
    * | EqualityExpression EQUALITY_OPERATOR RelationalExpression
@@ -677,10 +716,15 @@ export class Parser {
     return tokenType === tokensEnum.COMPLEX_ASSIGNMENT || tokenType === tokensEnum.SIMPLE_ASSIGNMENT;
   }
   _checkLeftAssignment(left) {
-    if (left.type === ASTTypes.Identifier) {
-      return left;
+    switch (left.type) {
+      case ASTTypes.Identifier:
+      case ASTTypes.MemberExpression: {
+        return left;
+      }
+      default: {
+        throw SyntaxError(`Left side of assignment must be a variable`);
+      }
     }
-    throw SyntaxError(`Left side of assignment must be a variable`);
   }
   _isLiteral(tokenType) {
     switch (tokenType) {
