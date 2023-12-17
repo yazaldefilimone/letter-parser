@@ -32,6 +32,10 @@ export const tokensEnum = {
   DEF: `def`,
   DOT: `.`,
   RETURN: `return`,
+  CLASS: `class`,
+  SUPER: `super`,
+  THIS: `this`,
+  NEW: `new`,
 };
 const spec = [
   // keywords
@@ -46,6 +50,10 @@ const spec = [
   [/^\bfor\b/, tokensEnum.FOR],
   [/^\bdef\b/, tokensEnum.DEF],
   [/^\breturn\b/, tokensEnum.RETURN],
+  [/^\bclass\b/, tokensEnum.CLASS],
+  [/^\bsuper\b/, tokensEnum.SUPER],
+  [/^\bthis\b/, tokensEnum.THIS],
+  [/^\bnew\b/, tokensEnum.NEW],
   // dot
   [/^\./, tokensEnum.DOT],
   // numbers
