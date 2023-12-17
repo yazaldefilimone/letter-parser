@@ -36,6 +36,7 @@ export const tokensEnum = {
   SUPER: `super`,
   THIS: `this`,
   NEW: `new`,
+  EXTENDS: `extends`,
 };
 const spec = [
   // keywords
@@ -54,6 +55,7 @@ const spec = [
   [/^\bsuper\b/, tokensEnum.SUPER],
   [/^\bthis\b/, tokensEnum.THIS],
   [/^\bnew\b/, tokensEnum.NEW],
+  [/^\bextends\b/, tokensEnum.EXTENDS],
   // dot
   [/^\./, tokensEnum.DOT],
   // numbers
