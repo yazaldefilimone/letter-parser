@@ -13,39 +13,59 @@ export default (test) => {
         type: ASTTypes.ForStatement,
         init: {
           type: ASTTypes.AssignmentExpression,
-          operator: '=',
           left: {
             type: ASTTypes.Identifier,
             name: 'x',
           },
+          operator: '=',
           right: {
-            type: ASTTypes.Literal,
-            value: 10,
+            type: ASTTypes.NumericLiteral,
+            value: '10',
           },
         },
         test: {
           type: ASTTypes.BinaryExpression,
-          operator: '>',
           left: {
             type: ASTTypes.Identifier,
             name: 'x',
           },
+          operator: '>',
           right: {
-            type: ASTTypes.Literal,
-            value: 0,
+            type: ASTTypes.NumericLiteral,
+            value: '0',
           },
         },
         update: {
           type: ASTTypes.AssignmentExpression,
-          operator: '-=',
           left: {
             type: ASTTypes.Identifier,
             name: 'x',
           },
+          operator: '-=',
           right: {
-            type: ASTTypes.Literal,
-            value: 1,
+            type: ASTTypes.NumericLiteral,
+            value: '1',
           },
+        },
+        body: {
+          type: ASTTypes.BlockStatement,
+          body: [
+            {
+              type: ASTTypes.ExpressionStatement,
+              expression: {
+                type: ASTTypes.BinaryExpression,
+                left: {
+                  type: ASTTypes.Identifier,
+                  name: 'x',
+                },
+                operator: '-',
+                right: {
+                  type: ASTTypes.NumericLiteral,
+                  value: '1',
+                },
+              },
+            },
+          ],
         },
       },
     ],
@@ -63,6 +83,10 @@ export default (test) => {
         init: null,
         test: null,
         update: null,
+        body: {
+          type: ASTTypes.BlockStatement,
+          body: [],
+        },
       },
     ],
   };
