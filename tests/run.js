@@ -9,7 +9,7 @@ const imports = files.map(async (curr) => await import(`./${curr}`));
 
 const exec = () => {
   const program = `
-    for (x = 10; x > 0; x -= 1) {
+    for (let x = 10; x > 0; x -= 1) {
       x - 1;  
     }
   `;
