@@ -8,6 +8,8 @@ export const tokensEnum = {
   LEFT_BRACE: `{`,
   IDENTIFIER: `IDENTIFIER`,
   RIGHT_BRACE: `}`,
+  LEFT_BRACKET: `[`,
+  RIGHT_BRACKET: `]`,
   LEFT_PARENT: `(`,
   SIMPLE_ASSIGNMENT: `SIMPLE_ASSIGNMENT`,
   COMPLEX_ASSIGNMENT: `COMPLEX_ASSIGNMENT`,
@@ -28,6 +30,7 @@ export const tokensEnum = {
   DO: `do`,
   FOR: `for`,
   DEF: `def`,
+  DOT: `.`,
   RETURN: `return`,
 };
 const spec = [
@@ -43,6 +46,8 @@ const spec = [
   [/^\bfor\b/, tokensEnum.FOR],
   [/^\bdef\b/, tokensEnum.DEF],
   [/^\breturn\b/, tokensEnum.RETURN],
+  // dot
+  [/^\./, tokensEnum.DOT],
   // numbers
   [/^\d+/, tokensEnum.NUMBER],
   // strings ""
@@ -60,6 +65,9 @@ const spec = [
   // block
   [/^\{/, tokensEnum.LEFT_BRACE],
   [/^\}/, tokensEnum.RIGHT_BRACE],
+  // array
+  [/^\[/, tokensEnum.LEFT_BRACKET],
+  [/^\]/, tokensEnum.RIGHT_BRACKET],
   // relational operators
   [/^[<>]=?/, tokensEnum.RELATIONAL_OPERATOR],
   // comma
