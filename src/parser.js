@@ -26,9 +26,12 @@ export const ASTTypes = {
   ReturnStatement: `ReturnStatement`,
   MemberExpression: `MemberExpression`,
   CallExpression: `CallExpression`,
+  ClassDeclaration: `ClassDeclaration`,
+  ThisExpression: `ThisExpression`,
+  SuperExpression: `SuperExpression`,
+  NewExpression: `NewExpression`,
 };
 
-// const LiteralCache = new Map();
 export class Parser {
   constructor() {
     this._currentString;
@@ -95,11 +98,17 @@ export class Parser {
       case tokensEnum.IF: {
         return this.IfStatement();
       }
+      case tokensEnum.CLASS: {
+        return this.ClassDeclaration();
+      }
       case tokensEnum.RETURN: {
         return this.ReturnStatement();
       }
       case tokensEnum.DEF: {
         return this.FunctionDeclaration();
+      }
+      case tokensEnum.NEW: {
+        return this.NewExpression();
       }
       case tokensEnum.WHILE:
       case tokensEnum.DO:
@@ -112,6 +121,41 @@ export class Parser {
     }
   }
 
+  NewExpression() {
+    const newKeyword = this._eat(tokensEnum.NEW);
+    const callee = this.MemberExpression();
+    const _arguments = this.Arguments();
+    return {
+      type: ASTTypes.NewExpression,
+      callee,
+      arguments: _arguments,
+    };
+  }
+
+  /*
+   * ClassDeclaration
+   * : CLASS Identifier LEFT_PARENT RIGHT_PARENT  BlockStatement
+   * | CLASS Identifier LEFT_PARENT Identifier RIGHT_PARENT  BlockStatement
+   */
+
+  ClassDeclaration() {
+    const classKeyword = this._eat(tokensEnum.CLASS);
+    const id = this.Identifier();
+    const superClass = this._isNode(tokensEnum.EXTENDS) ? this.ClassExtends() : null;
+    const body = this.BlockStatement();
+    return {
+      type: ASTTypes.ClassDeclaration,
+      id,
+      superClass,
+      body,
+    };
+  }
+
+  ClassExtends() {
+    const extendsKeyword = this._eat(tokensEnum.EXTENDS);
+    const superClass = this.Identifier();
+    return superClass;
+  }
   /*
    * FunctionDeclaration
    * : DEF Identifier LEFT_PARENT FormalParamenterList RIGHT_PARENT BlockStatement
@@ -452,6 +496,9 @@ export class Parser {
    * ;
    * */
   CallExpression() {
+    if (this._lookAhead.type === tokensEnum.SUPER) {
+      return this._CallExpression(this.SuperExpression());
+    }
     const memberExpression = this.MemberExpression();
     if (this._lookAhead.type === tokensEnum.LEFT_PARENT) {
       return this._CallExpression(memberExpression);
@@ -607,13 +654,45 @@ export class Parser {
       return this.Literal();
     }
     switch (this._lookAhead.type) {
-      case tokensEnum.LEFT_PARENT:
+      case tokensEnum.LEFT_PARENT: {
         return this.ParenthesizedExpression();
-      case tokensEnum.IDENTIFIER:
+      }
+      case tokensEnum.IDENTIFIER: {
         return this.Identifier();
-      default:
+      }
+      case tokensEnum.THIS: {
+        return this.ThisExpression();
+      }
+      case tokensEnum.NEW: {
+        return this.NewExpression();
+      }
+      default: {
         return this.LeftHandSideExpression();
+      }
     }
+  }
+  /*
+   * ThisExpression
+   * : This
+   * ;
+   */
+  ThisExpression() {
+    const thisKeyword = this._eat(tokensEnum.THIS);
+    return {
+      type: ASTTypes.ThisExpression,
+    };
+  }
+
+  /*
+   * SuperExpression
+   * : SUPER
+   * ;
+   */
+  SuperExpression() {
+    const superKeyword = this._eat(tokensEnum.SUPER);
+    return {
+      type: ASTTypes.SuperExpression,
+    };
   }
   /*
    * ParenthesizedExpression
