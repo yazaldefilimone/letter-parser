@@ -18,21 +18,16 @@ const exec = () => {
     def calc() {
       return this.x + this.y;
     }
-
    }
 
-   class Point3D extends Point {
-    def constructor(x, y, z) {
-      super(x, y);
-      this.z = z;
-    }
-
-    def calc() {
-      return super.calc() + this.z;
-    }
-   }
-    let p3d = new Point3D(10, 20, 30);
-    p3d.calc();
+  //  class Point3D extends Point {
+  //   def constructor(x, y, z) {
+  //     super(x, y);
+  //     this.z = z;
+  //   }
+  //  }
+    // let p3d = new Point3D(10, 20, 30);
+    // p3d.calc();
   `;
   const ast = parser.parse(program);
   console.log(JSON.stringify(ast, null, 2));
@@ -50,5 +45,5 @@ const testRun = async () => {
 };
 
 exec();
-// testRun();
+testRun();
 console.log('All source tests passed!');
