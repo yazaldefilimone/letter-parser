@@ -1,0 +1,24 @@
+/**
+ * Class declaration
+ */
+class Point {
+  def constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  def calc() {
+    return this.x + this.y;
+  }
+}
+
+// second class
+class Point3D extends Point {
+ def  constructor(x, y, z) {
+    super(x, y);
+    this.z = z;
+  }
+}
+// initialize class
+let p3d = new Point3D(10, 20, 30);
+p3d.calc();
