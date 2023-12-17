@@ -22,9 +22,11 @@ export const ASTTypes = {
   WhileStatement: `WhileStatement`,
   DoWhileStatement: `DoWhileStatement`,
   ForStatement: `ForStatement`,
+  FunctionDeclaration: `FunctionDeclaration`,
+  ReturnStatement: `ReturnStatement`,
 };
 
-const LiteralCache = new Map();
+// const LiteralCache = new Map();
 export class Parser {
   constructor() {
     this._currentString;
@@ -88,6 +90,12 @@ export class Parser {
       case tokensEnum.IF: {
         return this.IfStatement();
       }
+      case tokensEnum.RETURN: {
+        return this.ReturnStatement();
+      }
+      case tokensEnum.DEF: {
+        return this.FunctionDeclaration();
+      }
       case tokensEnum.WHILE:
       case tokensEnum.DO:
       case tokensEnum.FOR: {
@@ -99,6 +107,61 @@ export class Parser {
     }
   }
 
+  /*
+   * FunctionDeclaration
+   * : DEF Identifier LEFT_PARENT FormalParamenterList RIGHT_PARENT BlockStatement
+   * ;
+   */
+  FunctionDeclaration() {
+    const defkeyword = this._eat(tokensEnum.DEF);
+    const id = this.Identifier();
+    this._eat(tokensEnum.LEFT_PARENT);
+    const params = this.FormalParamenterList();
+    this._eat(tokensEnum.RIGHT_PARENT);
+    const body = this.BlockStatement();
+    return {
+      type: ASTTypes.FunctionDeclaration,
+      id,
+      params,
+      body,
+    };
+  }
+
+  /*
+   * FormalParamenterList
+   * : FormalParamenterList COMMA Identifier
+   * | Identifier
+   * ;
+   */
+  FormalParamenterList() {
+    if (this._lookAhead.type === tokensEnum.RIGHT_PARENT) {
+      return [];
+    }
+    const identifiers = [this.Identifier()];
+    while (this._lookAhead.type === tokensEnum.COMMA) {
+      this._eat(tokensEnum.COMMA);
+      identifiers.push(this.Identifier());
+    }
+    return identifiers;
+  }
+
+  /*
+   * ReturnStatement
+   * : RETURN Expression SEMICOLON
+   * ;
+   */
+  ReturnStatement() {
+    const returnKeyword = this._eat(tokensEnum.RETURN);
+    let argument = null;
+    if (this._lookAhead.type !== tokensEnum.SEMICOLON) {
+      argument = this.Expression();
+    }
+    this._eat(tokensEnum.SEMICOLON);
+    return {
+      type: ASTTypes.ReturnStatement,
+      argument,
+    };
+  }
   /**
    * IterationStatement
    * : WHILE ParenthesizedExpression Statement
