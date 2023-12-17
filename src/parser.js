@@ -25,6 +25,7 @@ export const ASTTypes = {
   FunctionDeclaration: `FunctionDeclaration`,
   ReturnStatement: `ReturnStatement`,
   MemberExpression: `MemberExpression`,
+  CallExpression: `CallExpression`,
 };
 
 // const LiteralCache = new Map();
@@ -442,7 +443,20 @@ export class Parser {
    */
 
   LeftHandSideExpression() {
-    return this.MemberExpression();
+    return this.CallExpression();
+  }
+
+  /*
+   * CallExpression
+   * : MemberExpression LEFT_PARENT ArgumentList RIGHT_PARENT
+   * ;
+   * */
+  CallExpression() {
+    const memberExpression = this.MemberExpression();
+    if (this._lookAhead.type === tokensEnum.LEFT_PARENT) {
+      return this._CallExpression(memberExpression);
+    }
+    return memberExpression;
   }
 
   /*
@@ -453,7 +467,7 @@ export class Parser {
    */
   MemberExpression() {
     let object = this.PrimaryExpression();
-    while (this._lookAhead.type === tokensEnum.LEFT_BRACKET || this._lookAhead.type === tokensEnum.DOT) {
+    while (this.isOneOf(tokensEnum.LEFT_BRACKET, tokensEnum.DOT)) {
       if (this._lookAhead.type === tokensEnum.LEFT_BRACKET) {
         this._eat(tokensEnum.LEFT_BRACKET);
         const property = this.Expression();
@@ -466,7 +480,7 @@ export class Parser {
         };
       }
 
-      if (this._lookAhead.type === tokensEnum.DOT) {
+      if (this._isNode(tokensEnum.DOT)) {
         this._eat(tokensEnum.DOT);
         const property = this.Identifier();
         object = {
@@ -699,6 +713,34 @@ export class Parser {
       name: token.value,
     };
   }
+  /*
+   * Arguments
+   * : LEFT_PARENT ArgumentList RIGHT_PARENT
+   * ;
+   */
+  Arguments() {
+    this._eat(tokensEnum.LEFT_PARENT);
+    const argumentsList = this.ArgumentList();
+    this._eat(tokensEnum.RIGHT_PARENT);
+    return argumentsList;
+  }
+  /*
+   * ArgumentList
+   * : ArgumentList COMMA AssignmentExpression
+   * | AssignmentExpression
+   * ;
+   */
+  ArgumentList() {
+    if (this._lookAhead.type === tokensEnum.RIGHT_PARENT) {
+      return [];
+    }
+    const argumentsList = [this.AssignmentExpression()];
+    while (this._lookAhead.type === tokensEnum.COMMA) {
+      this._eat(tokensEnum.COMMA);
+      argumentsList.push(this.AssignmentExpression());
+    }
+    return argumentsList;
+  }
   _eat(type) {
     const token = this._lookAhead;
     if (token === null) {
@@ -766,5 +808,33 @@ export class Parser {
       };
     }
     return left;
+  }
+  /*
+   * CallExpression Helper
+   * : Callee Arguments
+   * Callee
+   * : CallExpression
+   * | MemberExpression
+   * ;
+   */
+  _CallExpression(callee) {
+    let callExpression = {
+      type: ASTTypes.CallExpression,
+      callee,
+      arguments: this.Arguments(),
+    };
+    if (this._lookAhead.type === tokensEnum.LEFT_PARENT) {
+      callExpression = this._CallExpression(callExpression);
+    }
+
+    return callExpression;
+  }
+  // verify if the next token is one of the specified types
+  isOneOf(...nodeTypes) {
+    return nodeTypes.includes(this._lookAhead.type);
+  }
+  // verify if the next token is specified type
+  _isNode(nodeType) {
+    return nodeType === this._lookAhead.type;
   }
 }
