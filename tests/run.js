@@ -9,9 +9,9 @@ const imports = files.map(async (curr) => await import(`./${curr}`));
 
 const exec = () => {
   const program = `
-    for (let x = 10; x > 0; x -= 1) {
-      x - 1;  
-    }
+  def square(x, e) {
+    return x;
+  }
   `;
   const ast = parser.parse(program);
   console.log(JSON.stringify(ast, null, 2));
@@ -26,8 +26,8 @@ const testRun = async () => {
   for await (const iterator of imports) {
     iterator.default(test);
   }
-
-  console.log('All source tests passed!');
 };
+
 exec();
 testRun();
+console.log('All source tests passed!');
