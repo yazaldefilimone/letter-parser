@@ -27,6 +27,8 @@ export const tokensEnum = {
   WHILE: `while`,
   DO: `do`,
   FOR: `for`,
+  DEF: `def`,
+  RETURN: `return`,
 };
 const spec = [
   // keywords
@@ -39,6 +41,8 @@ const spec = [
   [/^\bwhile\b/, tokensEnum.WHILE],
   [/^\bdo\b/, tokensEnum.DO],
   [/^\bfor\b/, tokensEnum.FOR],
+  [/^\bdef\b/, tokensEnum.DEF],
+  [/^\breturn\b/, tokensEnum.RETURN],
   // numbers
   [/^\d+/, tokensEnum.NUMBER],
   // strings ""
